@@ -1,6 +1,6 @@
-# Lazy Action Setup
+# Actions Setup
 
-Sets environment variables that will be used by other Lazy Actions
+Sets environment variables that will be used by other Actions
 
 ## Environment Variables
 
@@ -21,3 +21,10 @@ Following output variables are set by default in addition to `gitversion`
 | Parameter       | Description                                                                          |
 | --------------- | ------------------------------------------------------------------------------------ |
 | `image_version` | Returns a semantic version that can used as a version for docker, helm, octopus, etc |
+
+## Usage
+
+```yaml
+    - name: Setup
+      uses: variant-inc/actions-setup@v1
+```
