@@ -21,7 +21,6 @@ AWS_WEB_IDENTITY_TOKEN="$(cat "$AWS_WEB_IDENTITY_TOKEN_FILE")"
 echo "::add-mask::$AWS_WEB_IDENTITY_TOKEN"
 echo "AWS_WEB_IDENTITY_TOKEN=$AWS_WEB_IDENTITY_TOKEN" >>"$GITHUB_ENV"
 
-
 echo "::add-mask::$LAZY_API_KEY"
 echo "::add-mask::$LAZY_API_URL"
 {
