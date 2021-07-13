@@ -9,11 +9,13 @@ rm gitversion-execute.js
 
 echo "::add-mask::$SONAR_TOKEN"
 echo "::add-mask::$OCTOPUS_CLI_API_KEY"
+echo "::add-mask::$DOCKER_TOKEN"
 {
   echo "SONAR_TOKEN=$SONAR_TOKEN"
   echo "SONAR_ORG=$SONAR_ORG"
   echo "OCTOPUS_CLI_SERVER=$OCTOPUS_CLI_SERVER"
   echo "OCTOPUS_CLI_API_KEY=$OCTOPUS_CLI_API_KEY"
+  echo "DOCKER_PASSWORD=$DOCKER_TOKEN"
 } >>"$GITHUB_ENV"
 
 echo "AWS_ROLE_ARN=$AWS_ROLE_ARN" >>"$GITHUB_ENV"
