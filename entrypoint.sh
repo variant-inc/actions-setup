@@ -30,3 +30,15 @@ echo "::add-mask::$LAZY_API_URL"
   echo "LAZY_API_URL=$LAZY_API_URL"
 } >>"$GITHUB_ENV"
 
+echo "::add-mask::$GITHUB_ID"
+{
+  echo "GITHUB_ID=$GITHUB_ID"
+  echo "GITHUB_OWNER=$GITHUB_OWNER"
+  echo "RUNNER_LABELS=$RUNNER_LABELS"
+} >>"$GITHUB_ENV"
+
+echo "::add-mask::$CONAN_KEY"
+{
+  echo "CONAN_KEY=$CONAN_KEY"
+  echo "CONAN_LOGIN_USERNAME=$CONAN_LOGIN_USERNAME"
+} >>"$GITHUB_ENV"
