@@ -16,6 +16,7 @@ runs:
         Write-Host "Setting environment variable IMAGE_VERSION to: $versionNumber"
         echo "::set-output name=image-version::$versionNumber"
         Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "IMAGE_VERSION=$versionNumber"
+        Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "OCTOPUS_RELEASE_VERSION=$versionNumber"
 
         $SONAR_PROJECT_KEY = $(${env:GITHUB_REPOSITORY} -replace "/", "_")
         Write-Host "Setting environment variable SONAR_PROJECT_KEY to: $SONAR_PROJECT_KEY"
