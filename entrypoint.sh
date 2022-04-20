@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-
+sudo git clean -fdx
 ## Reference: https://github.com/GitTools/actions/
 curl -sL https://raw.githubusercontent.com/GitTools/actions/main/dist/github/gitversion/execute/bundle.js -o gitversion-execute.js
 node gitversion-execute.js
