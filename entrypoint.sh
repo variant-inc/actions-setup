@@ -9,8 +9,9 @@ curl -sL https://raw.githubusercontent.com/GitTools/actions/main/dist/github/git
 node gitversion-execute.js
 rm gitversion-execute.js
 
-SONAR_ORG=$(echo "$SONAR_ORGS" | jq -r ".[\"$GITHUB_REPOSITORY_OWNER\"]")
+S_ORG=$(echo "$SONAR_ORGS" | jq -r ".[\"$GITHUB_REPOSITORY_OWNER\"]")
 AWS_WEB_IDENTITY_TOKEN="$(cat "$AWS_WEB_IDENTITY_TOKEN_FILE")"
+SONAR_ORG="${S_ORG:-$SONAR_ORG}"
 
 echo "::add-mask::$SONAR_TOKEN"
 echo "::add-mask::$OCTOPUS_CLI_API_KEY"
