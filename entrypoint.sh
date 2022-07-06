@@ -43,6 +43,9 @@ if [[ 1 -gt "$(cat $GITHUB_ENV | grep -c AWS_DEFAULT_REGION)" ]]; then
     echo "AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION" >> "$GITHUB_ENV"
 fi
 if [[ 1 -gt "$(cat $GITHUB_ENV | grep -c AWS_REGION)" ]]; then
-    AWS_REGION="${AWS_REGION:=$AWS_DEFAULT_REGION}"
-    echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_ENV"
+    if [[ "$AWS_DEFAULT_REGION" != "$AWS_REGION" ]]; then
+        echo "AWS_REGION=$AWS_DEFAULT_REGION" >> "$GITHUB_ENV"
+    else
+        echo "AWS_REGION=$AWS_REGION" >> "$GITHUB_ENV"
+    fi
 fi
