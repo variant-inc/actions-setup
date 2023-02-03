@@ -14,6 +14,6 @@ runs:
       run: |
         $versionNumber = "${env:GITVERSION_NUGETVERSION}.${env:GITHUB_RUN_NUMBER}"
         Write-Host "Setting environment variable IMAGE_VERSION to: $versionNumber"
-        echo "::set-output name=image-version::$versionNumber"
+        echo "image-version=${versionNumber}" >> $env:GITHUB_OUTPUT
         Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "IMAGE_VERSION=$versionNumber"
         Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "OCTOPUS_RELEASE_VERSION=$versionNumber"
