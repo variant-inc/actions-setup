@@ -1,9 +1,35 @@
+---
 repos:
-  - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.31.1
+  - repo: local
     hooks:
-    - id: markdownlint
+      - id: action-docs
+        name: action-docs
+        entry: ./scripts/action-docs.sh
+        language: system
+        files: action.yml
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-shebang-scripts-are-executable
+      - id: check-case-conflict
   - repo: https://github.com/lovesegfault/beautysh
     rev: v6.2.1
     hooks:
-    - id: beautysh
+      - id: beautysh
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.34.0
+    hooks:
+      - id: markdownlint
+  - repo: https://github.com/jumanjihouse/pre-commit-hook-yamlfmt
+    rev: 0.2.3
+    hooks:
+      - id: yamlfmt
+        args: [--mapping, '2', --sequence, '4', --offset, '2']
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.31.0
+    hooks:
+      - id: yamllint
+        args: [--format, parsable, --strict]

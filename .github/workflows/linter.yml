@@ -1,0 +1,20 @@
+---
+name: Linter
+
+on:  # yamllint disable-line rule:truthy
+  push:
+
+jobs:
+  lint:
+    name: Lint Code Base
+    runs-on: ubunut-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - uses: actions/setup-python@v3
+      - name: Install pre-commit dependencies
+        run: |
+          # Action Docs - https://github.com/npalm/action-docs
+          npm install -g action-docs
+      - uses: pre-commit/action@v3.0.0
