@@ -1,0 +1,26 @@
+mode: ContinuousDeployment
+continuous-delivery-fallback-tag: ""
+branches:
+  main:
+    mode: ContinuousDeployment
+    increment: Patch
+    prevent-increment-of-merged-branch-version: true
+    regex: ^master$|^main$
+    tag: ''
+    source-branches:
+      - feature
+    is-release-branch: true
+    is-mainline: true
+    pre-release-weight: 55000
+  feature:
+    mode: ContinuousDeployment
+    tag: useBranchName
+    increment: Minor
+    regex: ^(?!master|main).*$
+    source-branches:
+      - main
+    tracks-release-branches: true
+    pre-release-weight: 30000
+ignore:
+  sha: []
+merge-message-formats: {}
