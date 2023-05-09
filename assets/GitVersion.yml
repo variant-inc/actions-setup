@@ -1,5 +1,6 @@
+---
 mode: ContinuousDeployment
-continuous-delivery-fallback-tag: ""
+continuous-delivery-fallback-tag: ''
 branches:
   main:
     mode: ContinuousDeployment
