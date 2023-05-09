@@ -1,0 +1,53 @@
+---
+# yamllint disable rule:line-length
+name: Release
+
+on:  # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  Release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0
+        with:
+          versionSpec: 5.x
+      - name: Determine Version
+        uses: gittools/actions/gitversion/execute@v0
+        with:
+          useConfigFile: true
+      - name: Create tag
+        uses: actions/github-script@v5
+        if: ${{ github.ref == 'refs/heads/master' }}
+        with:
+          script: |
+            # MajorMinorPatch
+            github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/v${process.env.GITVERSION_MAJORMINORPATCH}`,
+              sha: context.sha
+            })
+            # MajorMinor
+            github.rest.git.updateRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/v${process.env.GITVERSION_MAJOR}.${process.env.GITVERSION_MINOR}`,
+              sha: context.sha,
+              force: true
+            })
+            # Major
+            github.rest.git.updateRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/v${process.env.GITVERSION_MAJOR}`,
+              sha: context.sha,
+              force: true
+            })

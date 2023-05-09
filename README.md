@@ -30,5 +30,5 @@ Sets environment variables that will be used by other Actions
 
 ```yaml
     - name: Setup
-      uses: variant-inc/actions-setup@v1
+      uses: variant-inc/actions-setup@v2
 ```
