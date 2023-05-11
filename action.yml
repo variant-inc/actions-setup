@@ -7,7 +7,7 @@ outputs:
     description: >-
       Returns a semantic version that can used as a version for docker,
       helm, octopus, etc
-    value: ${{ steps.setup.outputs.image-version }}
+    value: ${{ steps.set-version.outputs.image-version }}
 runs:
   using: composite
   steps:
@@ -57,6 +57,7 @@ runs:
       with:
         useConfigFile: true
     - name: Set Version
+      id: set-version
       shell: bash
       run: ${{ github.action_path }}/scripts/set_version.sh
 

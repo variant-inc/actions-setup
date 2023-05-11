@@ -5,6 +5,7 @@
 Sets up all the required env variables to be used by others
 <!-- action-docs-description -->
 
+<!-- markdownlint-disable line-length -->
 <!-- action-docs-inputs -->
 
 <!-- action-docs-inputs -->

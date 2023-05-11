@@ -2,6 +2,7 @@
 
 set -e
 
+echo "$@"
 for var in "$@"
 do
     DIR="$(dirname "${var}")"
