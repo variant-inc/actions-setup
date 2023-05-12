@@ -1,7 +1,25 @@
 ---
 # yamllint disable rule:line-length
 name: Setup Action
-description: Sets up all the required env variables to be used by others
+description: |
+  Sets up all the required env variables to be used by others
+
+  ## Permissions
+
+  Add the following permissions to the job
+
+  ```yaml
+  permissions:
+    id-token: write
+    contents: read
+  ```
+
+  ## Usage
+
+  ```yaml
+      - name: Setup
+        uses: variant-inc/actions-setup@v2
+  ```
 outputs:
   image_version:
     description: >-
@@ -22,6 +40,9 @@ runs:
         secret-ids: |
           SECRET_, arn:aws:secretsmanager:us-east-2:108141096600:secret:actions-secret-v2
         parse-json-secrets: true
+    # Converts all SECRET__{env} type to {env} environment variable
+    - shell: pwsh
+      run: ${{ github.action_path }}/scripts/convertSecretsEnv.ps1
 
     - name: Checkout
       uses: actions/checkout@v3

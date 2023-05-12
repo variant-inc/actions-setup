@@ -3,6 +3,23 @@
 ## Description
 
 Sets up all the required env variables to be used by others
+
+## Permissions
+
+Add the following permissions to the job
+
+```yaml
+permissions:
+  id-token: write
+  contents: read
+```
+
+## Usage
+
+```yaml
+    - name: Setup
+      uses: variant-inc/actions-setup@v2
+```
 <!-- action-docs-description -->
 
 <!-- markdownlint-disable line-length -->
@@ -24,12 +41,3 @@ Sets up all the required env variables to be used by others
 
 This action is a `composite` action.
 <!-- action-docs-runs -->
-
-Sets environment variables that will be used by other Actions
-
-## Usage
-
-```yaml
-    - name: Setup
-      uses: variant-inc/actions-setup@v2
-```
