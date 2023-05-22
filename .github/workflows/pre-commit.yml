@@ -1,0 +1,19 @@
+---
+# yamllint disable rule:line-length
+name: Pre-Commit
+
+on:  # yamllint disable-line rule:truthy
+  push:
+
+jobs:
+  preCommit:
+    name: pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install pre-commit dependencies
+        run: |
+          # Action Docs - https://github.com/npalm/action-docs
+          npm install -g action-docs
+      - uses: actions/setup-python@v3
+      - uses: pre-commit/action@v3.0.0

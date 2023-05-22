@@ -1,30 +1,43 @@
 # Actions Setup
+<!-- action-docs-description -->
+## Description
 
-Sets environment variables that will be used by other Actions
+Sets up all the required env variables to be used by others
 
-## Environment Variables
+## Permissions
 
-Following environment variables are set by default in addition to `gitversion`
+Add the following permissions to the job
 
-| Parameter             | Description             |
-| --------------------- | ----------------------- |
-| `SONAR_TOKEN`         | Sonar Token             |
-| `SONAR_ORG`           | Sonar Organization Name |
-| `AWS_ROLE_ARN`        | AWS Role ARN            |
-| `OCTOPUS_CLI_SERVER`  | octopus cli Server      |
-| `OCTOPUS_CLI_API_KEY` | octopus cli API key     |
-
-## Output Variables
-
-Following output variables are set by default in addition to `gitversion`
-
-| Parameter       | Description                                                                          |
-| --------------- | ------------------------------------------------------------------------------------ |
-| `image_version` | Returns a semantic version that can used as a version for docker, helm, octopus, etc |
+```yaml
+permissions:
+  id-token: write
+  contents: read
+```
 
 ## Usage
 
 ```yaml
     - name: Setup
-      uses: variant-inc/actions-setup@v1
+      uses: variant-inc/actions-setup@v2
 ```
+<!-- action-docs-description -->
+
+<!-- markdownlint-disable line-length -->
+<!-- action-docs-inputs -->
+
+<!-- action-docs-inputs -->
+<!-- markdownlint-enable line-length -->
+
+<!-- action-docs-outputs -->
+## Outputs
+
+| parameter | description |
+| --- | --- |
+| image_version | Returns a semantic version that can used as a version for docker, helm, octopus, etc |
+<!-- action-docs-outputs -->
+
+<!-- action-docs-runs -->
+## Runs
+
+This action is a `composite` action.
+<!-- action-docs-runs -->

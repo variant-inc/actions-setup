@@ -1,19 +1,93 @@
-name: "Setup Action"
-description: "Sets up all the required env variables to be used by others"
+---
+# yamllint disable rule:line-length
+name: Setup Action
+description: |
+  Sets up all the required env variables to be used by others
+
+  ## Permissions
+
+  Add the following permissions to the job
+
+  ```yaml
+  permissions:
+    id-token: write
+    contents: read
+  ```
+
+  ## Usage
+
+  ```yaml
+      - name: Setup
+        uses: variant-inc/actions-setup@v2
+  ```
 outputs:
   image_version:
-    description: "Image Version"
-    value: ${{ steps.setup.outputs.image-version }}
+    description: >-
+      Returns a semantic version that can used as a version for docker,
+      helm, octopus, etc
+    value: ${{ steps.set-version.outputs.image-version }}
 runs:
-  using: "composite"
+  using: composite
   steps:
-    - shell: bash
-      run: ${{ github.action_path }}/entrypoint.sh
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        role-to-assume: arn:aws:iam::108141096600:role/ops-github-runner
+        aws-region: us-east-2
+    - name: Get actions secret
+      uses: aws-actions/aws-secretsmanager-get-secrets@v1
+      with:
+        secret-ids: |
+          SECRET_, arn:aws:secretsmanager:us-east-2:108141096600:secret:actions-secret-v2
+        parse-json-secrets: true
+    # Converts all SECRET__{env} type to {env} environment variable
     - shell: pwsh
-      id: setup
+      run: ${{ github.action_path }}/scripts/convertSecretsEnv.ps1
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: GitGuardian scan
+      uses: GitGuardian/ggshield/actions/secret@main
+      env:
+        GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_PULL_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        GITGUARDIAN_API_KEY: ${{ env.SECRET__GITGUARDIAN_API_KEY }}
+
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v0
+      with:
+        versionSpec: 5.x
+    - name: Create GitVersion.yml if not exists
+      shell: bash
       run: |
-        $versionNumber = "${env:GITVERSION_NUGETVERSION}.${env:GITHUB_RUN_NUMBER}"
-        Write-Host "Setting environment variable IMAGE_VERSION to: $versionNumber"
-        echo "image-version=${versionNumber}" >> $env:GITHUB_OUTPUT
-        Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "IMAGE_VERSION=$versionNumber"
-        Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "OCTOPUS_RELEASE_VERSION=$versionNumber"
+        FILE=GitVersion.yml
+        if [ -f "$FILE" ]; then
+          echo "::debug::$FILE exists."
+        else
+          echo "::debug::::debug::$FILE does not exist."
+          echo "Creating $FILE..."
+          cp ${{ github.action_path }}/assets/GitVersion.yml GitVersion.yml
+        fi
+    - name: Determine Version
+      uses: gittools/actions/gitversion/execute@v0
+      with:
+        useConfigFile: true
+    - name: Set Version
+      id: set-version
+      shell: bash
+      run: ${{ github.action_path }}/scripts/set_version.sh
+
+    - name: Set Sonar Keys
+      shell: bash
+      run: ${{ github.action_path }}/scripts/set_sonar_key.sh
+    - name: Set Sonar Org
+      shell: pwsh
+      run: |
+        $OWNER = [regex]::replace($env:GITHUB_REPOSITORY_OWNER, '-', '_').ToUpper()
+        $SONAR_ORG = (get-item env:"SECRET__SONAR_ORGS_${OWNER}").Value
+        Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "SONAR_ORG=$SONAR_ORG"
