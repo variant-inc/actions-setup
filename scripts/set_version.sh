@@ -2,10 +2,7 @@
 
 set -e
 
-versionNumber="${GITVERSION_ASSEMBLYSEMVER}"
-if [ "${GITVERSION_PRERELEASELABEL}" == "" ]; then
-    versionNumber="${GITVERSION_NUGETVERSION}"
-fi
+versionNumber="${GITVERSION_NUGETVERSION}"
 
 {
     echo "IMAGE_VERSION=$versionNumber"
