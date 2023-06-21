@@ -20,7 +20,7 @@ branches:
   feature:
     mode: ContinuousDeployment
     tag: useBranchName
-    increment: Minor
+    increment: Inherit
     regex: ^(?!master|main).*$
     source-branches:
       - main
