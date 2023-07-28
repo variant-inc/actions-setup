@@ -48,6 +48,8 @@ runs:
       uses: actions/checkout@v3
       with:
         fetch-depth: 0
+        submodules: true
+        token: ${{ env.GITHUB_ENTERPRISE_KEY }}
 
     - name: GitGuardian scan
       uses: GitGuardian/ggshield/actions/secret@main
