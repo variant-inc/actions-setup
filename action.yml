@@ -45,7 +45,7 @@ runs:
       run: ${{ github.action_path }}/scripts/convertSecretsEnv.ps1
 
     - name: Checkout
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
         submodules: true
