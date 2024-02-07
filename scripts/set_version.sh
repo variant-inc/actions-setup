@@ -2,9 +2,9 @@
 
 set -e
 
-versionNumber="${GITVERSION_ASSEMBLYSEMVER}"
-if [ "${GITVERSION_PRERELEASELABEL}" == "" ]; then
-    versionNumber="${GITVERSION_NUGETVERSION}"
+versionNumber="${GitVersion_AssemblySemVer:=}"
+if [ "${GitVersion_preReleaseLabel:=}" == "" ]; then
+    versionNumber="${GitVersion_NuGetVersion:?}"
 fi
 
 {
