@@ -15,5 +15,15 @@ jobs:
         run: |
           # Action Docs - https://github.com/npalm/action-docs
           npm install -g action-docs
+
+          mkdir -p "$HOME/.local/bin"
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+          sudo apt install shellcheck
+
+          SHFFMT_VERSION="$(curl -sfSL https://api.github.com/repos/mvdan/sh/releases/latest | jq -r '.tag_name')"
+          curl -sfSLo ./shfmt "https://github.com/mvdan/sh/releases/download/$SHFFMT_VERSION/shfmt_${SHFFMT_VERSION}_$(uname)_amd64"
+          chmod +x shfmt
+          mv shfmt $HOME/.local/bin/
       - uses: actions/setup-python@v3
       - uses: pre-commit/action@v3.0.0
