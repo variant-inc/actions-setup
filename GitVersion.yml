@@ -16,7 +16,7 @@ mode: ContinuousDeployment
 continuous-delivery-fallback-tag: ''
 branches:
   development:
-    increment: None
+    increment: Patch
     # Everything except main and master
     regex: ^(?!(main|master)$)
     track-merge-target: true
