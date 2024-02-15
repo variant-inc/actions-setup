@@ -64,7 +64,7 @@ runs:
         else
           echo "::debug::::debug::$FILE does not exist."
           echo "Creating $FILE..."
-          cp ${{ github.action_path }}/assets/GitVersion.yml GitVersion.yml
+          cp ${{ github.action_path }}/GitVersion.yml GitVersion.yml
         fi
     - name: Determine Version
       uses: gittools/actions/gitversion/execute@v0
