@@ -8,7 +8,7 @@ major-version-bump-message: '(build|chore|ci|docs|feat|fix|perf|refactor|revert|
 # https://regex101.com/r/Oqhi2m/1
 minor-version-bump-message: '(feat)(\([a-z]+\))?: .+'
 # https://regex101.com/r/f5C4fP/1
-patch-version-bump-message: '(build|chore|ci|docs|fix|perf|refactor|revert|style|test)(\([a-z]+\))?: .+'
+patch-version-bump-message: ^.+$
 # Match nothing
 no-bump-message: ^\b$
 
