@@ -3,10 +3,10 @@
 assembly-file-versioning-format: '{NuGetVersionV2}.{env:GITHUB_RUN_NUMBER ?? 9999}'
 assembly-versioning-format: '{NuGetVersionV2}.{env:GITHUB_RUN_NUMBER ?? 9999}'
 # Conventional Commits https://www.conventionalcommits.org/en/v1.0.0/
-# https://regex101.com/r/Ms7Vx6/2
-major-version-bump-message: '(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z]+\))?(!: .+|: (.+\n\n)+BREAKING CHANGE: .+)'
-# https://regex101.com/r/Oqhi2m/1
-minor-version-bump-message: '(feat)(\([a-z]+\))?: .+'
+# https://regex101.com/r/oUbnEq/1
+major-version-bump-message: (build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([\w\s-]*\))?(!:|:.*\n\n((.+\n)+\n)?BREAKING CHANGE:\s.+)
+# https://regex101.com/r/O64EGX/1
+minor-version-bump-message: '(feat)(\([\w\s-]*\))?:'
 # https://regex101.com/r/f5C4fP/1
 patch-version-bump-message: ^.+$
 # Match nothing
