@@ -25,5 +25,5 @@ jobs:
           curl -sfSLo ./shfmt "https://github.com/mvdan/sh/releases/download/$SHFFMT_VERSION/shfmt_${SHFFMT_VERSION}_$(uname)_amd64"
           chmod +x shfmt
           mv shfmt $HOME/.local/bin/
-      - uses: actions/setup-python@v3
+      - uses: actions/setup-python@v5
       - uses: pre-commit/action@v3.0.0
