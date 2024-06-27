@@ -20,6 +20,11 @@ description: |
       - name: Setup
         uses: variant-inc/actions-setup@v2
   ```
+inputs:
+  repository:
+    description: Repository name with owner. For example, actions/checkout
+    required: false
+    default: ${{ github.repository }}
 outputs:
   image_version:
     description: >-
@@ -57,6 +62,7 @@ runs:
         fetch-depth: 0
         submodules: true
         token: ${{ env.GITHUB_ENTERPRISE_KEY }}
+        repository: ${{ inputs.repository }}
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v1

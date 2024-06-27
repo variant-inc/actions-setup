@@ -24,7 +24,11 @@ permissions:
 
 <!-- markdownlint-disable line-length -->
 <!-- action-docs-inputs -->
+## Inputs
 
+| parameter | description | required | default |
+| --- | --- | --- | --- |
+| repository | Repository name with owner. For example, actions/checkout | `false` | ${{ github.repository }} |
 <!-- action-docs-inputs -->
 <!-- markdownlint-enable line-length -->
 
