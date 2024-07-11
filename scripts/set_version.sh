@@ -2,12 +2,12 @@
 
 set -e
 
-declare GitVersion_preReleaseLabel
+declare GitVersion_PreReleaseLabel
 declare GitVersion_AssemblySemVer
 declare GitVersion_NuGetVersion
 
 versionNumber="${GitVersion_AssemblySemVer}"
-if [ "${GitVersion_preReleaseLabel}" == "" ]; then
+if [ "${GitVersion_PreReleaseLabel}" == "" ]; then
 	versionNumber="${GitVersion_NuGetVersion}"
 fi
 
