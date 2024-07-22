@@ -59,7 +59,7 @@ runs:
         token: ${{ env.GITHUB_ENTERPRISE_KEY }}
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v1
+      uses: gittools/actions/gitversion/setup@v2
       with:
         versionSpec: 5.x
     - name: Create GitVersion.yml if not exists
@@ -74,7 +74,7 @@ runs:
           cp ${{ github.action_path }}/GitVersion.yml GitVersion.yml
         fi
     - name: Determine Version
-      uses: gittools/actions/gitversion/execute@v1
+      uses: gittools/actions/gitversion/execute@v2
       with:
         useConfigFile: true
     - name: Set Version
