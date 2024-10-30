@@ -58,11 +58,18 @@ runs:
         submodules: true
         token: ${{ env.GITHUB_ENTERPRISE_KEY }}
 
+    - name: Get the 10th last commit SHA
+      id: get_commit
+      run: |
+        commit_sha=$(git rev-list --skip=9 --max-count=1 HEAD)
+        echo "10th last commit SHA: $commit_sha"
+        echo "::set-output name=sha::$commit_sha"
+
     - name: GitGuardian scan
       if: ${{ env.DISABLE_GITGUARDIAN == 'false' }}
       uses: GitGuardian/ggshield-action@v1
       env:
-        # GITHUB_PUSH_BEFORE_SHA: 242ab7aa1c74109ada1af65b17a6d6df5ed418d8
+        GITHUB_PUSH_BEFORE_SHA: ${{ steps.get_commit.outputs.sha }}
         GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
         GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         GITGUARDIAN_API_KEY: ${{ env.GITGUARDIAN_API_KEY }}
