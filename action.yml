@@ -60,6 +60,7 @@ runs:
 
     - name: Get the 10th last commit SHA
       id: get_commit
+      shell: bash
       run: |
         commit_sha=$(git rev-list --skip=9 --max-count=1 HEAD)
         echo "10th last commit SHA: $commit_sha"
