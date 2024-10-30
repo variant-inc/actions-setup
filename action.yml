@@ -58,6 +58,23 @@ runs:
         submodules: true
         token: ${{ env.GITHUB_ENTERPRISE_KEY }}
 
+    - name: Get the 10th last commit SHA
+      id: get_commit
+      shell: bash
+      run: |
+        commit_sha=$(git rev-list --max-count=9 HEAD | tail -1)
+        echo "10th last commit SHA: $commit_sha"
+        echo "sha=$commit_sha" >> "$GITHUB_OUTPUT"
+
+    - name: GitGuardian scan
+      if: ${{ env.DISABLE_GITGUARDIAN == 'false' }}
+      uses: GitGuardian/ggshield-action@v1
+      env:
+        GITHUB_PUSH_BEFORE_SHA: ${{ steps.get_commit.outputs.sha }}
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        GITGUARDIAN_API_KEY: ${{ env.GITGUARDIAN_API_KEY }}
+
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v2
       with:
