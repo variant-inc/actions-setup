@@ -61,11 +61,9 @@ runs:
     - name: GitGuardian scan
       if: ${{ env.DISABLE_GITGUARDIAN == 'false' }}
       uses: GitGuardian/ggshield-action@v1
-      with:
-          args: -v --ignore-known-secrets --commit-history
       env:
-        # GITHUB_PUSH_BEFORE_SHA: ${{ github.event.before }}
-        # GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
+        GITHUB_PUSH_BEFORE_SHA: 242ab7aa1c74109ada1af65b17a6d6df5ed418d8
+        GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
         GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         GITGUARDIAN_API_KEY: ${{ env.GITGUARDIAN_API_KEY }}
 
