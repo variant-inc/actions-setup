@@ -64,7 +64,7 @@ runs:
       run: |
         commit_sha=$(git rev-list --max-count=9 HEAD | tail -1)
         echo "10th last commit SHA: $commit_sha"
-        echo "::set-output name=sha::$commit_sha"
+        echo "sha=$commit_sha" >> "$GITHUB_OUTPUT"
 
     - name: GitGuardian scan
       if: ${{ env.DISABLE_GITGUARDIAN == 'false' }}
