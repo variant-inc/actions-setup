@@ -44,6 +44,11 @@ runs:
     - shell: pwsh
       run: ${{ github.action_path }}/scripts/convertSecretsEnv.ps1
 
+    - name: Get AWS Parameter store env
+      shell: bash
+      run: |
+        ${{ github.action_path }}/scripts/getAWSParameter.sh arn:aws:ssm:us-east-2:108141096600:parameter/actions-envs
+
     - name: Convert azure token into base64 encoded
       shell: bash
       run: |
