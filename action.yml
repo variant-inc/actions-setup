@@ -111,5 +111,5 @@ runs:
       shell: pwsh
       run: |
         $OWNER = [regex]::replace($env:GITHUB_REPOSITORY_OWNER, '-', '_').ToUpper()
-        $SONAR_ORG = (get-item env:"SECRET__SONAR_ORGS_${OWNER}").Value
+        $SONAR_ORG = (get-item env:"SONAR_ORGS_${OWNER}").Value
         Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "SONAR_ORG=$SONAR_ORG"
