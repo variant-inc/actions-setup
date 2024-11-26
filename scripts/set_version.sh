@@ -4,11 +4,11 @@ set -e
 
 declare GitVersion_PreReleaseLabel
 declare GitVersion_AssemblySemVer
-declare GitVersion_NuGetVersion
+declare GitVersion_SemVer
 
 versionNumber="${GitVersion_AssemblySemVer}"
 if [ "${GitVersion_PreReleaseLabel}" == "" ]; then
-	versionNumber="${GitVersion_NuGetVersion}"
+	versionNumber="${GitVersion_SemVer}"
 fi
 
 {
