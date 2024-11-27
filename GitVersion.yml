@@ -13,7 +13,6 @@ patch-version-bump-message: ^.+$
 no-bump-message: ^\b$
 
 mode: ContinuousDeployment
-continuous-delivery-fallback-tag: ''
 branches:
   development:
     increment: Patch

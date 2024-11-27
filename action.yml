@@ -97,6 +97,8 @@ runs:
         fi
     - name: Determine Version
       uses: gittools/actions/gitversion/execute@v3
+      with:
+        useConfigFile: true
     - name: Set Version
       id: set-version
       shell: bash
