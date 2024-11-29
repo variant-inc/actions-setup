@@ -81,9 +81,9 @@ runs:
         GITGUARDIAN_API_KEY: ${{ env.GITGUARDIAN_API_KEY }}
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v2
+      uses: gittools/actions/gitversion/setup@v3
       with:
-        versionSpec: 5.x
+        versionSpec: 6.x
     - name: Create GitVersion.yml if not exists
       shell: bash
       run: |
@@ -96,7 +96,7 @@ runs:
           cp ${{ github.action_path }}/GitVersion.yml GitVersion.yml
         fi
     - name: Determine Version
-      uses: gittools/actions/gitversion/execute@v2
+      uses: gittools/actions/gitversion/execute@v3
       with:
         useConfigFile: true
     - name: Set Version
