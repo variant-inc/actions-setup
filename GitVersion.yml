@@ -17,7 +17,7 @@ branches:
   feature:
     increment: Patch
     # Everything except main and master
-    regex: ^(?!(main|master)$)
+    regex: ^(?!main|master)(?<BranchName>.+)
     track-merge-target: true
     source-branches: []
   develop:
