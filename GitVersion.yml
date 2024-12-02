@@ -14,15 +14,12 @@ no-bump-message: ^\b$
 
 mode: ContinuousDeployment
 branches:
-  development:
+  feature:
     increment: Patch
     # Everything except main and master
     regex: ^(?!(main|master)$)
     track-merge-target: true
     source-branches: []
-  feature:
-    # Match nothing
-    regex: ^\b$
   develop:
     # Match nothing
     regex: ^\b$
