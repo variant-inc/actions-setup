@@ -114,3 +114,14 @@ runs:
         $OWNER = [regex]::replace($env:GITHUB_REPOSITORY_OWNER, '-', '_').ToUpper()
         $SONAR_ORG = (get-item env:"SONAR_ORGS_${OWNER}").Value
         Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "SONAR_ORG=$SONAR_ORG"
+
+    - name: Run delete-stale-branches
+      id: delete-stale-branches
+      shell: bash
+      run: ${{ github.action_path }}/scripts/delete_stale_branches.sh
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_ENTERPRISE_KEY }}
+        DRY_RUN: true
+        DELETE_TAGS: true
+        MINIMUM_TAGS: 30
+        DATE: 3 months ago
