@@ -12,11 +12,10 @@ RED='\033[0;31m'
 # Reset color escape code
 RESET='\033[0m'
 
-REPO="${GITHUB_REPOSITORY}"
 DRY_RUN=${DRY_RUN:-true}
 DELETE_TAGS=${DELETE_TAGS:-false}
 MINIMUM_TAGS=${MINIMUM_TAGS:-0}
-DEFAULT_BRANCHES=${DEFAULT_BRANCHES:-main,master,develop}
+DEFAULT_BRANCHES=${DEFAULT_BRANCHES},main,master,develop
 EXCLUDE_BRANCH_REGEX=${EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${EXTRA_PROTECTED_TAG_REGEX:-^$}
 EXCLUDE_OPEN_PR_BRANCHES=${EXCLUDE_OPEN_PR_BRANCHES:-true}
@@ -44,7 +43,7 @@ default_branch_protected() {
 branch_protected() {
 	local br=${1}
 
-	protected=$(gh api "repos/${REPO}/branches/${br}" --jq '.protected')
+	protected=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${br}" --jq '.protected')
 
 	case ${protected} in
 	null)
@@ -74,7 +73,7 @@ is_pr_open_on_branch() {
 	fi
 
 	local br=${1}
-	open_prs_branches=$(gh api "repos/${REPO}/pulls" --jq '.[].head.ref' --paginate)
+	open_prs_branches=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" --jq '.[].head.ref' --paginate)
 
 	for pr_br in ${open_prs_branches}; do
 		if [[ "${pr_br}" == "${br}" ]]; then
