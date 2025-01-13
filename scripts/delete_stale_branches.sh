@@ -40,21 +40,6 @@ default_branch_protected() {
 	return 1
 }
 
-branch_protected() {
-	local br=${1}
-
-	protected=$(gh api "repos/${GITHUB_REPOSITORY}/branches/${br}" --jq '.protected')
-
-	case ${protected} in
-	null)
-		echo -e "${RED}[ERROR] Unable to determine status for branch: ${br}${RESET}"
-		return 0
-		;;
-	true) return 0 ;;
-	*) return 1 ;;
-	esac
-}
-
 extra_branch_or_tag_protected() {
 	local br=${1} ref="${2}"
 
@@ -113,11 +98,6 @@ main() {
 
 			if default_branch_protected "${br}"; then
 				echo "[INFO] Branch: ${br} is a default branch. Won't delete it"
-				continue
-			fi
-
-			if branch_protected "${br}"; then
-				echo "[INFO] Branch: ${br} is likely protected. Won't delete it"
 				continue
 			fi
 
