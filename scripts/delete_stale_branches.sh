@@ -5,7 +5,7 @@ set -eo pipefail
 # Validate environment variables
 [[ -n ${DATE} ]] || {
 	echo -e "${RED}[ERROR] Please specify a suitable date input for branch filtering${RESET}"
-	exit 1
+	exit 0
 }
 # Red color escape code
 RED='\033[0;31m'
