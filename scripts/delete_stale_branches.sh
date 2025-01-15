@@ -7,6 +7,7 @@ set -eo pipefail
 	echo -e "${RED}[ERROR] Please specify a suitable date input for branch filtering${RESET}"
 	exit 0
 }
+
 # Red color escape code
 RED='\033[0;31m'
 # Reset color escape code
@@ -15,7 +16,7 @@ RESET='\033[0m'
 DRY_RUN=${DRY_RUN:-true}
 DELETE_TAGS=${DELETE_TAGS:-false}
 MINIMUM_TAGS=${MINIMUM_TAGS:-0}
-DEFAULT_BRANCHES=${DEFAULT_BRANCHES},main,master,develop
+DEFAULT_BRANCHES=${DEFAULT_BRANCHES},main,master,develop,gh-pages
 EXCLUDE_BRANCH_REGEX=${EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${EXTRA_PROTECTED_TAG_REGEX:-^$}
 EXCLUDE_OPEN_PR_BRANCHES=${EXCLUDE_OPEN_PR_BRANCHES:-true}
@@ -24,6 +25,9 @@ echo "[INFO] Started cleanup process"
 echo "[INFO] Dry run mode: ${DRY_RUN}"
 
 deleted_branches=()
+
+# Fetch open PR branches once
+open_prs_branches=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" --jq '.[].head.ref' --paginate)
 
 default_branch_protected() {
 	local br=${1}
@@ -58,8 +62,8 @@ is_pr_open_on_branch() {
 	fi
 
 	local br=${1}
-	open_prs_branches=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" --jq '.[].head.ref' --paginate)
 
+	# Check if the branch is in the list of open PR branches
 	for pr_br in ${open_prs_branches}; do
 		if [[ "${pr_br}" == "${br}" ]]; then
 			return 0
