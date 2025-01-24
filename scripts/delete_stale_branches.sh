@@ -149,7 +149,7 @@ main() {
 	done
 
 	log_message "INFO" "Deleted branches: ${deleted_branches[*]}"
-	log_message "NOTICE" "We will start deleting stale branches from 14th Feb. If you want to protect any of these branches please set EXTRA_PROTECTED_BRANCH_REGEX"
+	echo "::warning::We will start deleting stale branches from 14th Feb. If you want to protect any of these branches please set EXTRA_PROTECTED_BRANCH_REGEX"
 
 	if [[ "${DELETE_TAGS}" == true ]]; then
 		local tag_counter=1
