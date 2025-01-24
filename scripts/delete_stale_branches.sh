@@ -2,16 +2,43 @@
 
 set -eo pipefail
 
-# Validate environment variables
-[[ -n ${DATE} ]] || {
-	echo -e "${RED}[ERROR] Please specify a suitable date input for branch filtering${RESET}"
-	exit 0
+# Set the log level (can be "INFO" or "DEBUG")
+LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+# Color definitions for log levels
+COLOR_INFO='\033[0;32m'  # Green for INFO
+COLOR_DEBUG='\033[0;34m' # Blue for DEBUG
+COLOR_ERROR='\033[0;31m' # Red for ERROR
+COLOR_RESET='\033[0m'    # Reset to default color
+
+# Logger function to log messages based on log level
+log_message() {
+	local level=$1
+	local message=$2
+
+	# Set color based on log level
+	local color
+	case "${level}" in
+	"INFO") color="${COLOR_INFO}" ;;
+	"DEBUG") color="${COLOR_DEBUG}" ;;
+	"ERROR") color="${COLOR_ERROR}" ;;
+	*) color="${COLOR_RESET}" ;;
+	esac
+
+	# Check if the message's level should be printed based on the current log level
+	if [[ "${level}" == "DEBUG" && "${LOG_LEVEL}" == "INFO" ]]; then
+		return 0
+	fi
+
+	# Log to console with color
+	echo -e "${color}[${level}] - ${message}${COLOR_RESET}"
 }
 
-# Red color escape code
-RED='\033[0;31m'
-# Reset color escape code
-RESET='\033[0m'
+# Validate environment variables
+[[ -n ${DATE} ]] || {
+	log_message "ERROR" "Please specify a suitable date input for branch filtering"
+	exit 0
+}
 
 DRY_RUN=${DRY_RUN:-true}
 DELETE_TAGS=${DELETE_TAGS:-false}
@@ -21,8 +48,8 @@ EXCLUDE_BRANCH_REGEX=${EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${EXTRA_PROTECTED_TAG_REGEX:-^$}
 EXCLUDE_OPEN_PR_BRANCHES=${EXCLUDE_OPEN_PR_BRANCHES:-true}
 
-echo "[INFO] Started cleanup process"
-echo "[INFO] Dry run mode: ${DRY_RUN}"
+log_message "INFO" "Started cleanup process"
+log_message "INFO" "Dry run mode: ${DRY_RUN}"
 
 deleted_branches=()
 
@@ -77,41 +104,43 @@ delete_branch_or_tag() {
 	local br=${1} ref="${2}" sha="${3}"
 	deleted_branches+=("${br}")
 
-	echo "[INFO] Deleting branch: ${br}"
+	log_message "INFO" "Deleting branch: ${br}"
 
 	if [[ "${DRY_RUN}" == false ]]; then
 		if ! git branch -D "${br}"; then
-			echo -e "${RED}[ERROR] Failed to delete local branch: ${br}. Continuing with next branch.${RESET}"
+			log_message "ERROR" "Failed to delete local branch: ${br}. Continuing with next branch."
 		fi
 
 		# Try to delete the branch remotely
 		if ! git push origin --delete "${br}"; then
-			echo -e "${RED}[ERROR] Failed to delete remote branch: ${br}. Continuing with next branch.${RESET}"
+			log_message "ERROR" "Failed to delete remote branch: ${br}. Continuing with next branch."
 		fi
 
-		echo "[INFO] Branch ${br} deleted successfully"
+		log_message "INFO" "Branch ${br} deleted successfully"
 	else
-		echo "[INFO] Dry run mode: Branch ${br} would be deleted"
+		log_message "INFO" "Dry run mode: Branch ${br} would be deleted"
 	fi
 }
 
 main() {
 	for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
+		log_message "DEBUG" "Checking branch: ${br}"
+
 		if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
 			sha=$(git show-ref -s "origin/${br}")
 
 			if default_branch_protected "${br}"; then
-				echo "[INFO] Branch: ${br} is a default branch. Won't delete it"
+				log_message "DEBUG" "Branch: ${br} is a default branch. Won't delete it"
 				continue
 			fi
 
 			if extra_branch_or_tag_protected "${br}" "branch"; then
-				log INFO "Branch: ${br} is explicitly protected. Won't delete it"
+				log_message "DEBUG" "Branch: ${br} is explicitly protected. Won't delete it"
 				continue
 			fi
 
 			if is_pr_open_on_branch "${br}"; then
-				echo "[INFO] Branch: ${br} has an open pull request. Won't delete it"
+				log_message "DEBUG" "Branch: ${br} has an open pull request. Won't delete it"
 				continue
 			fi
 
@@ -119,7 +148,8 @@ main() {
 		fi
 	done
 
-	echo "[INFO] Deleted branches: ${deleted_branches[*]}"
+	log_message "INFO" "Deleted branches: ${deleted_branches[*]}"
+	log_message "NOTICE" "We will start deleting stale branches from 14th Feb. If you want to protect any of these branches please set EXTRA_PROTECTED_BRANCH_REGEX"
 
 	if [[ "${DELETE_TAGS}" == true ]]; then
 		local tag_counter=1
@@ -127,12 +157,12 @@ main() {
 			if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
 				if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
 					if extra_branch_or_tag_protected "${br}" "tag"; then
-						echo "[INFO] Tag: ${br} is explicitly protected. Won't delete it"
+						log_message "DEBUG" "Tag: ${br} is explicitly protected. Won't delete it"
 						continue
 					fi
 					delete_branch_or_tag "${br}" "tags"
 				else
-					echo "[INFO] Not deleting tag ${br} due to minimum tag requirement (min: ${MINIMUM_TAGS})"
+					log_message "DEBUG" "Not deleting tag ${br} due to minimum tag requirement (min: ${MINIMUM_TAGS})"
 					((tag_counter += 1))
 				fi
 			fi
