@@ -150,7 +150,8 @@ main() {
 
 	log_message "INFO" "Deleted branches: ${deleted_branches[*]}"
 	echo "::warning::We will start deleting stale branches ${deleted_branches[*]} from 14th Feb. \
-If you want to protect any branch from deletion please set EXTRA_PROTECTED_BRANCH_REGEX in github workflow as directed in the documentation"
+If you want to protect any branch from deletion please set EXTRA_PROTECTED_BRANCH_REGEX in github workflow as directed in the documentation \
+https://dx.docs.usxpress.io/build/protect-stale-branches/"
 
 	if [[ "${DELETE_TAGS}" == true ]]; then
 		local tag_counter=1
