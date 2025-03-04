@@ -52,7 +52,7 @@ runs:
     - name: Convert azure token into base64 encoded
       shell: bash
       run: |
-        AZ_DEVOPS_BASE64_PAT=$(echo -n ${{ env.AZ_DEVOPS_PAT }} | base64)
+        AZ_DEVOPS_BASE64_PAT=$(echo -n ${{ env.AZ_DEVOPS_PAT }} | base64 -w 0)
         echo "::add-mask::$AZ_DEVOPS_BASE64_PAT"
         echo "AZ_DEVOPS_BASE64_PAT=$AZ_DEVOPS_BASE64_PAT" >> $GITHUB_ENV
 
