@@ -11,6 +11,9 @@ COLOR_DEBUG='\033[0;34m' # Blue for DEBUG
 COLOR_ERROR='\033[0;31m' # Red for ERROR
 COLOR_RESET='\033[0m'    # Reset to default color
 
+deleted_branches=()
+deleted_releases=()
+
 # Logger function to log messages based on log level
 log_message() {
 	local level=$1
@@ -47,11 +50,10 @@ DEFAULT_BRANCHES=${DEFAULT_BRANCHES},main,master,develop,gh-pages,dev,developmen
 EXCLUDE_BRANCH_REGEX=${EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${EXTRA_PROTECTED_TAG_REGEX:-^$}
 EXCLUDE_OPEN_PR_BRANCHES=${EXCLUDE_OPEN_PR_BRANCHES:-true}
+DELETE_RELEASES=${DELETE_RELEASES:-false}
 
 log_message "INFO" "Started cleanup process"
 log_message "INFO" "Dry run mode: ${DRY_RUN}"
-
-deleted_branches=()
 
 # Fetch open PR branches once
 open_prs_branches=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" --jq '.[].head.ref' --paginate)
@@ -69,6 +71,42 @@ default_branch_protected() {
 	done
 
 	return 1
+}
+
+delete_release() {
+	log_message "INFO" "Checking for releases older than 6 months..."
+
+	# Get the current date and subtract 6 months
+	six_months_ago_timestamp=$(date -d "$(date --date="$DATE" -u '+%Y-%m-%dT%H:%M:%SZ')" +%s)
+
+	# Fetch all releases from GitHub
+	releases=$(gh api "repos/${GITHUB_REPOSITORY}/releases" --jq '.[]')
+
+	# Iterate over each release
+	echo "$releases" | while IFS= read -r release; do
+		release_tag=$(echo "$release" | jq -r '.tag_name')
+		release_date=$(echo "$release" | jq -r '.created_at')
+
+		# Convert release date to timestamp
+		release_timestamp=$(date -d "$release_date" +%s)
+
+		# Compare the release date with 6 months ago
+		if [[ "$release_timestamp" -lt "$six_months_ago_timestamp" ]]; then
+			log_message "INFO" "Release ${release_tag} is older than 6 months. Deleting it..."
+			deleted_releases+=("${release_tag}")
+
+			if [[ "${DRY_RUN}" == false ]]; then
+				# Delete the release
+				if ! gh release delete "${release_tag}" --yes; then
+					log_message "ERROR" "Failed to delete release for tag: ${release_tag}. Continuing with next release."
+				else
+					log_message "INFO" "Release for tag ${release_tag} deleted successfully"
+				fi
+			else
+				log_message "INFO" "Dry run mode: Release for tag ${release_tag} would be deleted"
+			fi
+		fi
+	done
 }
 
 extra_branch_or_tag_protected() {
@@ -169,6 +207,10 @@ https://dx.docs.usxpress.io/build/protect-stale-branches/"
 				fi
 			fi
 		done
+	fi
+
+	if [[ "${DELETE_RELEASES}" == true ]]; then
+		delete_release # Delete the corresponding release
 	fi
 }
 
