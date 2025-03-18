@@ -57,6 +57,7 @@ log_message "INFO" "Dry run mode: ${DRY_RUN}"
 
 # Fetch open PR branches once
 open_prs_branches=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" --jq '.[].head.ref' --paginate)
+releases=$(gh api "repos/${GITHUB_REPOSITORY}/releases" --jq '.[]')
 
 default_branch_protected() {
 	local br=${1}
@@ -73,27 +74,16 @@ default_branch_protected() {
 	return 1
 }
 
-delete_release() {
-	log_message "INFO" "Checking for releases older than 6 months..."
-
-	# Get the current date and subtract 6 months
-	six_months_ago_timestamp=$(date -d "$(date --date="$DATE" -u '+%Y-%m-%dT%H:%M:%SZ')" +%s)
-
-	# Fetch all releases from GitHub
-	releases=$(gh api "repos/${GITHUB_REPOSITORY}/releases" --jq '.[]')
+delete_releases_with_notags() {
+	log_message "INFO" "Checking for releases with no tags or deleted tags..."
 
 	# Iterate over each release
 	echo "$releases" | while IFS= read -r release; do
 		release_tag=$(echo "$release" | jq -r '.tag_name')
-		release_date=$(echo "$release" | jq -r '.created_at')
 
-		# Convert release date to timestamp
-		release_timestamp=$(date -d "$release_date" +%s)
-
-		# Compare the release date with 6 months ago
-		if [[ "$release_timestamp" -lt "$six_months_ago_timestamp" ]]; then
-			log_message "INFO" "Release ${release_tag} is older than 6 months. Deleting it..."
-			deleted_releases+=("${release_tag}")
+		# Check if the release has no tag or if the tag is deleted
+		if [[ -z "$release_tag" || -z "$(git ls-remote --tags origin "$release_tag")" ]]; then
+			log_message "INFO" "Release ${release_tag:-[No Tag]} is associated with a deleted tag or has no tag. Deleting it..."
 
 			if [[ "${DRY_RUN}" == false ]]; then
 				# Delete the release
@@ -105,6 +95,8 @@ delete_release() {
 			else
 				log_message "INFO" "Dry run mode: Release for tag ${release_tag} would be deleted"
 			fi
+			deleted_releases+=("${release_tag}")
+			continue
 		fi
 	done
 }
@@ -160,6 +152,31 @@ delete_branch_or_tag() {
 	fi
 }
 
+delete_release_for_tag() {
+	local tag=$1
+
+	# Find the release corresponding to the tag
+	release_tag=$(echo "$releases" | jq -r ". | select(.tag_name == \"${tag}\") | .tag_name")
+
+	if [[ -n "$release_tag" ]]; then
+		log_message "INFO" "Tag ${tag} deleted. Deleting corresponding release ${release_tag}."
+
+		if [[ "${DRY_RUN}" == false ]]; then
+			# Delete the release
+			if ! gh release delete "${release_tag}" --yes; then
+				log_message "ERROR" "Failed to delete release for tag: ${release_tag}. Continuing with next release."
+			else
+				log_message "INFO" "Release for tag ${release_tag} deleted successfully."
+			fi
+		else
+			log_message "INFO" "Dry run mode: Release for tag ${release_tag} would be deleted."
+		fi
+		deleted_releases+=("${release_tag}")
+	else
+		log_message "INFO" "No corresponding release found for tag ${tag}."
+	fi
+}
+
 main() {
 	for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
 		log_message "DEBUG" "Checking branch: ${br}"
@@ -201,6 +218,7 @@ https://dx.docs.usxpress.io/build/protect-stale-branches/"
 						continue
 					fi
 					delete_branch_or_tag "${br}" "tags"
+					delete_release_for_tag "${br}"
 				else
 					log_message "DEBUG" "Not deleting tag ${br} due to minimum tag requirement (min: ${MINIMUM_TAGS})"
 					((tag_counter += 1))
@@ -208,10 +226,11 @@ https://dx.docs.usxpress.io/build/protect-stale-branches/"
 			fi
 		done
 	fi
-
+	# This is to delete releases with no Tags
 	if [[ "${DELETE_RELEASES}" == true ]]; then
-		delete_release # Delete the corresponding release
+		delete_releases_with_notags
 	fi
+
 }
 
 main "$@"
