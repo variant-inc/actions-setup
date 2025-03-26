@@ -11,6 +11,9 @@ COLOR_DEBUG='\033[0;34m' # Blue for DEBUG
 COLOR_ERROR='\033[0;31m' # Red for ERROR
 COLOR_RESET='\033[0m'    # Reset to default color
 
+deleted_branches=()
+deleted_releases=()
+
 # Logger function to log messages based on log level
 log_message() {
 	local level=$1
@@ -47,14 +50,14 @@ DEFAULT_BRANCHES=${DEFAULT_BRANCHES},main,master,develop,gh-pages,dev,developmen
 EXCLUDE_BRANCH_REGEX=${EXTRA_PROTECTED_BRANCH_REGEX:-^$}
 EXCLUDE_TAG_REGEX=${EXTRA_PROTECTED_TAG_REGEX:-^$}
 EXCLUDE_OPEN_PR_BRANCHES=${EXCLUDE_OPEN_PR_BRANCHES:-true}
+DELETE_RELEASES=${DELETE_RELEASES:-false}
 
 log_message "INFO" "Started cleanup process"
 log_message "INFO" "Dry run mode: ${DRY_RUN}"
 
-deleted_branches=()
-
 # Fetch open PR branches once
 open_prs_branches=$(gh api "repos/${GITHUB_REPOSITORY}/pulls" --jq '.[].head.ref' --paginate)
+releases=$(gh api "repos/${GITHUB_REPOSITORY}/releases" --jq '.[]')
 
 default_branch_protected() {
 	local br=${1}
@@ -69,6 +72,33 @@ default_branch_protected() {
 	done
 
 	return 1
+}
+
+delete_releases_with_notags() {
+	log_message "INFO" "Checking for releases with no tags or deleted tags..."
+
+	# Iterate over each release
+	echo "$releases" | while IFS= read -r release; do
+		release_tag=$(echo "$release" | jq -r '.tag_name')
+
+		# Check if the release has no tag or if the tag is deleted
+		if [[ -z "$release_tag" || -z "$(git ls-remote --tags origin "$release_tag")" ]]; then
+			log_message "INFO" "Release ${release_tag:-[No Tag]} is associated with a deleted tag or has no tag. Deleting it..."
+
+			if [[ "${DRY_RUN}" == false ]]; then
+				# Delete the release
+				if ! gh release delete "${release_tag}" --yes; then
+					log_message "ERROR" "Failed to delete release for tag: ${release_tag}. Continuing with next release."
+				else
+					log_message "INFO" "Release for tag ${release_tag} deleted successfully"
+				fi
+			else
+				log_message "INFO" "Dry run mode: Release for tag ${release_tag} would be deleted"
+			fi
+			deleted_releases+=("${release_tag}")
+			continue
+		fi
+	done
 }
 
 extra_branch_or_tag_protected() {
@@ -122,6 +152,31 @@ delete_branch_or_tag() {
 	fi
 }
 
+delete_release_for_tag() {
+	local tag=$1
+
+	# Find the release corresponding to the tag
+	release_tag=$(echo "$releases" | jq -r ". | select(.tag_name == \"${tag}\") | .tag_name")
+
+	if [[ -n "$release_tag" ]]; then
+		log_message "INFO" "Tag ${tag} deleted. Deleting corresponding release ${release_tag}."
+
+		if [[ "${DRY_RUN}" == false ]]; then
+			# Delete the release
+			if ! gh release delete "${release_tag}" --yes; then
+				log_message "ERROR" "Failed to delete release for tag: ${release_tag}. Continuing with next release."
+			else
+				log_message "INFO" "Release for tag ${release_tag} deleted successfully."
+			fi
+		else
+			log_message "INFO" "Dry run mode: Release for tag ${release_tag} would be deleted."
+		fi
+		deleted_releases+=("${release_tag}")
+	else
+		log_message "INFO" "No corresponding release found for tag ${tag}."
+	fi
+}
+
 main() {
 	for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
 		log_message "DEBUG" "Checking branch: ${br}"
@@ -149,7 +204,7 @@ main() {
 	done
 
 	log_message "INFO" "Deleted branches: ${deleted_branches[*]}"
-	echo "::warning::We will start deleting stale branches ${deleted_branches[*]}. \
+	echo "::warning::Deleting stale branches ${deleted_branches[*]}. \
 If you want to protect any branch from deletion please set EXTRA_PROTECTED_BRANCH_REGEX in github workflow as directed in the documentation \
 https://dx.docs.usxpress.io/build/protect-stale-branches/"
 
@@ -163,6 +218,7 @@ https://dx.docs.usxpress.io/build/protect-stale-branches/"
 						continue
 					fi
 					delete_branch_or_tag "${br}" "tags"
+					delete_release_for_tag "${br}"
 				else
 					log_message "DEBUG" "Not deleting tag ${br} due to minimum tag requirement (min: ${MINIMUM_TAGS})"
 					((tag_counter += 1))
@@ -170,6 +226,11 @@ https://dx.docs.usxpress.io/build/protect-stale-branches/"
 			fi
 		done
 	fi
+	# This is to delete releases with no Tags
+	if [[ "${DELETE_RELEASES}" == true ]]; then
+		delete_releases_with_notags
+	fi
+
 }
 
 main "$@"
