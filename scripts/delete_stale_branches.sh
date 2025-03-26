@@ -204,7 +204,7 @@ main() {
 	done
 
 	log_message "INFO" "Deleted branches: ${deleted_branches[*]}"
-	echo "::warning::We will start deleting stale branches ${deleted_branches[*]}. \
+	echo "::warning::Deleting stale branches ${deleted_branches[*]}. \
 If you want to protect any branch from deletion please set EXTRA_PROTECTED_BRANCH_REGEX in github workflow as directed in the documentation \
 https://dx.docs.usxpress.io/build/protect-stale-branches/"
 
