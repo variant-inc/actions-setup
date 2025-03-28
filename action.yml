@@ -126,3 +126,4 @@ runs:
         MINIMUM_TAGS: 30
         DATE: 6 months ago
         DELETE_RELEASES: true
+        LOG_LEVEL: DEBUG
