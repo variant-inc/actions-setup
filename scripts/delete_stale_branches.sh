@@ -207,7 +207,7 @@ https://dx.docs.usxpress.io/build/protect-stale-branches/"
 
 	if [[ "${DELETE_TAGS}" == true ]]; then
 		local tag_counter=1
-		for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
+		for br in $(git for-each-ref --sort=-creatordate --format '%(refname)' refs/tags | sed "s@^.*tags/@@"); do
 			if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
 				if extra_branch_or_tag_protected "${br}" "tag"; then
 					log_message "DEBUG" "Tag: ${br} is explicitly protected. Won't delete it"
