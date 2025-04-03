@@ -76,17 +76,14 @@ default_branch_protected() {
 
 delete_releases_with_notags() {
 	log_message "INFO" "Checking for releases with no tags or deleted tags..."
-
 	# Iterate over each release
 	echo "$releases" | while IFS= read -r release; do
 		release_tag=$(echo "$release" | jq -r '.tag_name')
-
 		# Check if the release has no tag or if the tag is deleted
-		if [[ -z "$release_tag" || -z "$(git ls-remote --tags origin "$release_tag")" ]]; then
-			log_message "INFO" "Release ${release_tag:-[No Tag]} is associated with a deleted tag or has no tag. Deleting it..."
-
+		if [[ (-z "$release_tag" || -z "$(git ls-remote --tags origin "$release_tag")") && "$release_tag" != "" ]]; then
 			if [[ "${DRY_RUN}" == false ]]; then
 				# Delete the release
+				log_message "INFO" "Release for tag ${release_tag} deleted successfully"
 				if ! gh release delete "${release_tag}" --yes; then
 					log_message "ERROR" "Failed to delete release for tag: ${release_tag}. Continuing with next release."
 				else
@@ -210,19 +207,17 @@ https://dx.docs.usxpress.io/build/protect-stale-branches/"
 
 	if [[ "${DELETE_TAGS}" == true ]]; then
 		local tag_counter=1
-		for br in $(git ls-remote -q --tags --refs | sed "s@^.*tags/@@" | sort -rn); do
-			if [[ -z "$(git log --oneline -1 --since="${DATE}" "${br}")" ]]; then
-				if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
-					if extra_branch_or_tag_protected "${br}" "tag"; then
-						log_message "DEBUG" "Tag: ${br} is explicitly protected. Won't delete it"
-						continue
-					fi
-					delete_branch_or_tag "${br}" "tags"
-					delete_release_for_tag "${br}"
-				else
-					log_message "DEBUG" "Not deleting tag ${br} due to minimum tag requirement (min: ${MINIMUM_TAGS})"
-					((tag_counter += 1))
+		for br in $(git for-each-ref --sort=-creatordate --format '%(refname)' refs/tags | sed "s@^.*tags/@@"); do
+			if [[ ${tag_counter} -gt ${MINIMUM_TAGS} ]]; then
+				if extra_branch_or_tag_protected "${br}" "tag"; then
+					log_message "DEBUG" "Tag: ${br} is explicitly protected. Won't delete it"
+					continue
 				fi
+				delete_branch_or_tag "${br}" "tags"
+				delete_release_for_tag "${br}"
+			else
+				log_message "DEBUG" "Not deleting tag ${br} due to minimum tag requirement (min: ${MINIMUM_TAGS})"
+				((tag_counter += 1))
 			fi
 		done
 	fi
