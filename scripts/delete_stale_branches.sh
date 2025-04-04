@@ -3,7 +3,12 @@
 set -eo pipefail
 
 # Set the log level (can be "INFO" or "DEBUG")
-LOG_LEVEL=${LOG_LEVEL:-INFO}
+LOG_LEVEL=${BRANCH_CLEANUP_LOG_LEVEL:-INFO}
+DATE=${BRANCH_CLEANUP_SINCE_DATE:-6 months ago}
+DRY_RUN=${BRANCH_CLEANUP_DRY_RUN:-true}
+DELETE_TAGS=${BRANCH_CLEANUP_DELETE_TAGS:-true}
+MINIMUM_TAGS=${BRANCH_CLEANUP_MINIMUM_TAGS:-30}
+DELETE_RELEASES=${BRANCH_CLEANUP_DELETE_RELEASES:-true}
 
 # Color definitions for log levels
 COLOR_INFO='\033[0;32m'  # Green for INFO
@@ -180,6 +185,11 @@ main() {
 
 		if [[ -z "$(git log --oneline -1 --since="${DATE}" origin/"${br}")" ]]; then
 			sha=$(git show-ref -s "origin/${br}")
+
+			if [[ "$sha" == "$GITHUB_SHA" ]]; then
+				log_message "DEBUG" "Branch: ${br} is a current branch. Won't delete it"
+				continue
+			fi
 
 			if default_branch_protected "${br}"; then
 				log_message "DEBUG" "Branch: ${br} is a default branch. Won't delete it"
