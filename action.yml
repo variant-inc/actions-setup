@@ -80,7 +80,7 @@ runs:
         GITHUB_PUSH_BASE_SHA: ${{ github.event.base }}
         GITHUB_DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         GITGUARDIAN_API_KEY: ${{ env.GITGUARDIAN_API_KEY }}
-        GG_MAX_DOC_SIZE: 3145728
+        GG_MAX_DOC_SIZE: ${{ env.GG_MAX_DOC_SIZE }}
 
     - name: Install GitVersion
       uses: gittools/actions/gitversion/setup@v3
