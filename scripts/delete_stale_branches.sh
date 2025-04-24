@@ -181,7 +181,6 @@ delete_release_for_tag() {
 
 main() {
 	GITHUB_SHA=$(git rev-parse HEAD | tr -d '\r\n')
-	CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	for br in $(git ls-remote -q --heads --refs | sed "s@^.*heads/@@"); do
 		log_message "DEBUG" "Checking branch: ${br}"
 
@@ -192,10 +191,6 @@ main() {
 					log_message  "Branch: ${br} is the current branch checked with sha. Won't delete it"
 			fi
 
-			if [[ "$br" == "$CURRENT_BRANCH" ]]; then
-				log_message  "Branch: ${br} is the current branch. Won't delete it"
-				continue
-			fi
 			if default_branch_protected "${br}"; then
 				log_message "DEBUG" "Branch: ${br} is a default branch. Won't delete it"
 				continue
