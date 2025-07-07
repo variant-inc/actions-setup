@@ -82,9 +82,9 @@ runs:
         GITGUARDIAN_API_KEY: ${{ env.GITGUARDIAN_API_KEY }}
 
     - name: Install GitVersion
-      uses: gittools/actions/gitversion/setup@v4
+      uses: gittools/actions/gitversion/setup@v4.0.0
       with:
-        versionSpec: 6.0.x
+        versionSpec: '6.3.x'
     - name: Create GitVersion.yml if not exists
       shell: bash
       run: |
