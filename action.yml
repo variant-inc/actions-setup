@@ -4,6 +4,12 @@ name: Setup Action
 description: |
   Sets up all the required env variables to be used by others
 
+  - **Secret Environment Variables**: It retrieves secret values stored in AWS Secrets Manager from the ARN `arn:aws:secretsmanager:us-east-2:108141096600:secret:actions-secret-v2` and sets them as secret environment variables.
+
+  - **Non-Secret Environment Variables**: It retrieves non-secret variables from the AWS SSM Parameter Store using the ARN `arn:aws:ssm:us-east-2:108141096600:parameter/actions-envs` and sets them as regular environment variables.
+
+  This allows the application to securely access both sensitive and non-sensitive configuration values without hardcoding them.
+
   ## Permissions
 
   Add the following permissions to the job
@@ -29,45 +35,18 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: arn:aws:iam::108141096600:role/ops-github-runner
-        aws-region: us-east-2
-    - name: Get actions secret
-      uses: aws-actions/aws-secretsmanager-get-secrets@v2
-      with:
-        secret-ids: |
-          SECRET_, arn:aws:secretsmanager:us-east-2:108141096600:secret:actions-secret-v2
-        parse-json-secrets: true
-    # Converts all SECRET__{env} type to {env} environment variable
-    - shell: pwsh
-      run: ${{ github.action_path }}/scripts/convertSecretsEnv.ps1
-
-    - name: Get AWS Parameter store env
-      shell: bash
+    - shell: bash
       run: |
-        ${{ github.action_path }}/scripts/getAWSParameter.sh arn:aws:ssm:us-east-2:108141096600:parameter/actions-envs
+        mkdir -p ./.github/workflows/actions-setup/checkout
+        cp -R ${{ github.action_path }}/checkout/* ./.github/workflows/actions-setup/checkout/
 
-    - name: Convert azure token into base64 encoded
-      shell: bash
-      run: |
-        AZ_DEVOPS_BASE64_PAT=$(echo -n ${{ env.AZ_DEVOPS_PAT }} | base64 -w 0)
-        echo "::add-mask::$AZ_DEVOPS_BASE64_PAT"
-        echo "AZ_DEVOPS_BASE64_PAT=$AZ_DEVOPS_BASE64_PAT" >> $GITHUB_ENV
-
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        submodules: true
-        token: ${{ env.GITHUB_ENTERPRISE_KEY }}
+    - name: Run checkout action
+      uses: ./.github/workflows/actions-setup/checkout
 
     - name: Get the 10th last commit SHA
       id: get_commit
       shell: bash
       run: |
-        git config --global url."https://usx-devops:${{ env.GITHUB_ENTERPRISE_KEY }}@github.com".insteadOf "https://github.com"
         commit_sha=$(git rev-list --max-count=9 HEAD | tail -1)
         echo "10th last commit SHA: $commit_sha"
         echo "sha=$commit_sha" >> "$GITHUB_OUTPUT"
@@ -103,16 +82,6 @@ runs:
       id: set-version
       shell: bash
       run: ${{ github.action_path }}/scripts/set_version.sh
-
-    - name: Set Sonar Keys
-      shell: bash
-      run: ${{ github.action_path }}/scripts/set_sonar_key.sh
-    - name: Set Sonar Org
-      shell: pwsh
-      run: |
-        $OWNER = [regex]::replace($env:GITHUB_REPOSITORY_OWNER, '-', '_').ToUpper()
-        $SONAR_ORG = (get-item env:"SONAR_ORGS_${OWNER}").Value
-        Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "SONAR_ORG=$SONAR_ORG"
 
     - name: Run delete-stale-branches
       id: delete-stale-branches
