@@ -92,6 +92,6 @@ runs:
         DRY_RUN: true
         DELETE_TAGS: true
         MINIMUM_TAGS: 30
-        DATE: 6 months ago
+        DATE: 2 weeks ago
         DELETE_RELEASES: true
         LOG_LEVEL: DEBUG
