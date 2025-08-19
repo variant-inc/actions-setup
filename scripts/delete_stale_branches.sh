@@ -189,6 +189,7 @@ main() {
 			sha=$(git show-ref -s "origin/${br}" | tr -d '\r\n')
 			if [[ "$sha" == "$GITHUB_SHA" ]]; then
 				log_message "Branch: ${br} is the current branch checked with sha. Won't delete it"
+				continue
 			fi
 
 			if default_branch_protected "${br}"; then
