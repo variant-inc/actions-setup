@@ -89,7 +89,7 @@ runs:
       run: ${{ github.action_path }}/scripts/delete_stale_branches.sh
       env:
         GITHUB_TOKEN: ${{ env.GITHUB_ENTERPRISE_KEY }}
-        BRANCH_CLEANUP_DRY_RUN: true
+        BRANCH_CLEANUP_DRY_RUN: false
         BRANCH_CLEANUP_DELETE_TAGS: true
         BRANCH_CLEANUP_MINIMUM_TAGS: 30
         BRANCH_CLEANUP_SINCE_DATE: 6 months ago
