@@ -1,9 +1,7 @@
 #!/bin/bash
 
-set -eo pipefail
+set -o pipefail
 
-# Set the log level (can be "INFO" or "DEBUG")
-LOG_LEVEL=${BRANCH_CLEANUP_LOG_LEVEL:-INFO}
 DATE=${BRANCH_CLEANUP_SINCE_DATE:-6 months ago}
 DRY_RUN=${BRANCH_CLEANUP_DRY_RUN:-true}
 DELETE_TAGS=${BRANCH_CLEANUP_DELETE_TAGS:-true}
@@ -11,10 +9,10 @@ MINIMUM_TAGS=${BRANCH_CLEANUP_MINIMUM_TAGS:-30}
 DELETE_RELEASES=${BRANCH_CLEANUP_DELETE_RELEASES:-true}
 
 # Color definitions for log levels
-COLOR_INFO='\033[0;32m'  # Green for INFO
-COLOR_DEBUG='\033[0;34m' # Blue for DEBUG
-COLOR_ERROR='\033[0;31m' # Red for ERROR
-COLOR_RESET='\033[0m'    # Reset to default color
+COLOR_INFO=''
+COLOR_DEBUG='::debug::'
+COLOR_ERROR='::warn'
+COLOR_RESET=''
 
 deleted_branches=()
 deleted_releases=()
@@ -33,13 +31,8 @@ log_message() {
 	*) color="${COLOR_RESET}" ;;
 	esac
 
-	# Check if the message's level should be printed based on the current log level
-	if [[ "${level}" == "DEBUG" && "${LOG_LEVEL}" == "INFO" ]]; then
-		return 0
-	fi
-
 	# Log to console with color
-	echo -e "${color}[${level}] - ${message}${COLOR_RESET}"
+	echo -e "${color}[${level}] - ${message}"
 }
 
 # Validate environment variables
@@ -211,10 +204,12 @@ main() {
 		fi
 	done
 
-	log_message "INFO" "Deleted branches: ${deleted_branches[*]}"
-	echo "::warning::Deleting stale branches ${deleted_branches[*]}. \
-If you want to protect any branch from deletion please set EXTRA_PROTECTED_BRANCH_REGEX in github workflow as directed in the documentation \
-https://dx.docs.usxpress.io/build/protect-stale-branches/"
+	if [ ${#deleted_branches[@]} -ne 0 ]; then
+		log_message "INFO" "Deleted branches: ${deleted_branches[*]}"
+		echo "::warning::Deleting stale branches ${deleted_branches[*]}. \
+	If you want to protect any branch from deletion please set EXTRA_PROTECTED_BRANCH_REGEX in github workflow as directed in the documentation \
+	https://dx.docs.usxpress.io/build/protect-stale-branches/"
+	fi
 
 	if [[ "${DELETE_TAGS}" == true ]]; then
 		local tag_counter=1
