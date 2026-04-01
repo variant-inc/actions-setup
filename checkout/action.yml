@@ -30,7 +30,7 @@ runs:
         role-to-assume: arn:aws:iam::108141096600:role/ops-github-runner
         aws-region: us-east-2
     - name: Get actions secret
-      uses: aws-actions/aws-secretsmanager-get-secrets@v2
+      uses: aws-actions/aws-secretsmanager-get-secrets@v3
       with:
         secret-ids: |
           SECRET_, arn:aws:secretsmanager:us-east-2:108141096600:secret:actions-secret-v2
