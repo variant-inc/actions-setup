@@ -30,7 +30,7 @@ runs:
         role-to-assume: arn:aws:iam::108141096600:role/ops-github-runner
         aws-region: us-east-2
     - name: Get actions secret
-      uses: aws-actions/aws-secretsmanager-get-secrets@v3
+      uses: aws-actions/aws-secretsmanager-get-secrets@v4
       with:
         secret-ids: |
           SECRET_, arn:aws:secretsmanager:us-east-2:108141096600:secret:actions-secret-v2
@@ -63,7 +63,7 @@ runs:
         Add-Content -Path ${env:GITHUB_ENV} -Encoding utf8 -Value "SONAR_ORG=$SONAR_ORG"
 
     - name: Checkout
-      uses: actions/checkout@v6
+      uses: actions/checkout@v7
       with:
         fetch-depth: 0
         submodules: true
